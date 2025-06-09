@@ -1,2 +1,4 @@
 sounddevice==0.4.6
-scipy==1.10.1 
+scipy==1.10.1
+speech_recognition==3.10.0
+pydub==0.25.1 
