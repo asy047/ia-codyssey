@@ -6,16 +6,17 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal, engine
 from models import Base, Question
+from domain.question.question_router import router as question_router
 
 
-# 초기용: Alembic 사용 전 테스트할 때는 아래 주석을 해제해서 테이블 생성 가능
-# 실제 과제에서는 alembic 으로 마이그레이션을 수행하는 것이 핵심.
+# Alembic 으로 테이블을 관리하는 것이 원칙.
+# 초기 개발 단계에서만 사용하려면 주석 해제 가능.
 # Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
     title='Mars Board API',
-    description='문제5 데이터베이스를 또… - SQLite + SQLAlchemy + FastAPI',
+    description='문제5/6 게시판 + 질문 기능 - SQLite + SQLAlchemy + FastAPI',
 )
 
 
@@ -34,6 +35,10 @@ def read_root() -> Dict[str, str]:
 
 @app.get('/questions', response_model=List[Dict[str, Any]])
 def list_questions(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
+    """
+    기존 문제5에서 사용하던 예시용 질문 목록 API.
+    (원하면 삭제해도 무방, /api/question/list 를 사용해도 됨)
+    """
     questions = db.query(Question).order_by(Question.id.desc()).all()
 
     result: List[Dict[str, Any]] = []
@@ -55,6 +60,9 @@ def create_question(
     data: Dict[str, Any],
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
+    """
+    질문 생성용 예시 API.
+    """
     subject = str(data.get('subject', '')).strip()
     content = str(data.get('content', '')).strip()
 
@@ -86,3 +94,7 @@ def create_question(
         'content': question.content,
         'create_date': question.create_date.isoformat(),
     }
+
+
+# ★ 문제6 요구사항: question 라우터 등록
+app.include_router(question_router)
